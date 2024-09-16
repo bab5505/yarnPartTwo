@@ -1,33 +1,190 @@
 const express = require('express');
 const { Pool } = require('pg');
+const cors = require('cors'); // Ensure you have this installed
 const app = express();
 const port = 3000;
 
-// Middleware to parse JSON
+// Middleware to parse JSON and handle CORS
 app.use(express.json());
+app.use(cors());
 
 // PostgreSQL connection configuration
 const pool = new Pool({
-    user: 'robert',
-    host: 'localhost',
-    database: 'yarn_app',
-    password: 'cookers5',
-    port: 5432,
-  });
-
-// Test route to check server
-app.get('/', (req, res) => {
-  res.send('Server is up and running!');
+  user: 'robert',
+  host: 'localhost',
+  database: 'yarn_app',
+  password: 'cookers5',
+  port: 5432,
 });
 
-// Example route to get data from the database
-app.get('/items', async (req, res) => {
+// Route to fetch inventory items
+app.get('/inventory-items', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM items');
+    const result = await pool.query('SELECT * FROM inventory_items');
     res.json(result.rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Database query failed' });
+  }
+});
+
+// Route to add a new inventory item
+app.post('/inventory-items', async (req, res) => {
+  const { name, quantity, category, note } = req.body;
+  try {
+    await pool.query(
+      'INSERT INTO inventory_items (name, quantity, category, note) VALUES ($1, $2, $3, $4)',
+      [name, quantity, category, note]
+    );
+    res.status(201).json({ message: 'Item added' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to add item' });
+  }
+});
+
+// Route to update an inventory item
+app.put('/inventory-items/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, quantity, category, note } = req.body;
+  try {
+    await pool.query(
+      'UPDATE inventory_items SET name = $1, quantity = $2, category = $3, note = $4 WHERE id = $5',
+      [name, quantity, category, note, id]
+    );
+    res.json({ message: 'Item updated' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update item' });
+  }
+});
+
+// Route to delete an inventory item
+app.delete('/inventory-items/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM inventory_items WHERE id = $1', [id]);
+    res.json({ message: 'Item deleted' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete item' });
+  }
+});
+  
+
+// ---------------------------
+// Progress Tracker Endpoints
+// ---------------------------
+
+// Route to get all progress tracker items
+app.get('/progress-tracker', async (req, res) => {
+    try {
+      const result = await pool.query('SELECT * FROM progress_tracker');
+      res.json(result.rows);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Database query failed' });
+    }
+  });
+  
+  // Route to add a progress tracker item
+  app.post('/progress-tracker', async (req, res) => {
+    const { name, description, start_time, end_time } = req.body;
+    try {
+      await pool.query(
+        'INSERT INTO progress_tracker (name, description, start_time, end_time) VALUES ($1, $2, $3, $4)',
+        [name, description, start_time, end_time]
+      );
+      res.status(201).json({ message: 'Item added' });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to add item' });
+    }
+  });
+  
+  // Route to update a progress tracker item
+  app.put('/progress-tracker/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, description, start_time, end_time } = req.body;
+    try {
+      await pool.query(
+        'UPDATE progress_tracker SET name = $1, description = $2, start_time = $3, end_time = $4 WHERE id = $5',
+        [name, description, start_time, end_time, id]
+      );
+      res.json({ message: 'Item updated' });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to update item' });
+    }
+  });
+  
+  // Route to delete a progress tracker item
+  app.delete('/progress-tracker/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+      await pool.query('DELETE FROM progress_tracker WHERE id = $1', [id]);
+      res.json({ message: 'Item deleted' });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to delete item' });
+    }
+  });
+
+// ---------------------------
+// Projects Endpoints
+// ---------------------------
+
+// Route to get all projects
+app.get('/projects', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM projects');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database query failed' });
+  }
+});
+
+// Route to add a project
+app.post('/projects', async (req, res) => {
+  const { name, description, hook_size, needle_size, yarn_type, color } = req.body;
+  try {
+    await pool.query(
+      'INSERT INTO projects (name, description, hook_size, needle_size, yarn_type, color) VALUES ($1, $2, $3, $4, $5, $6)',
+      [name, description, hook_size, needle_size, yarn_type, color]
+    );
+    res.status(201).json({ message: 'Project added' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to add project' });
+  }
+});
+
+// Route to update a project
+app.put('/projects/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, description, hook_size, needle_size, yarn_type, color } = req.body;
+  try {
+    await pool.query(
+      'UPDATE projects SET name = $1, description = $2, hook_size = $3, needle_size = $4, yarn_type = $5, color = $6 WHERE id = $7',
+      [name, description, hook_size, needle_size, yarn_type, color, id]
+    );
+    res.json({ message: 'Project updated' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update project' });
+  }
+});
+
+// Route to delete a project
+app.delete('/projects/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM projects WHERE id = $1', [id]);
+    res.json({ message: 'Project deleted' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete project' });
   }
 });
 

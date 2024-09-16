@@ -1,69 +1,78 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
-function Inventory() {
+const Inventory = () => {
   const [items, setItems] = useState([]);
   const [input, setInput] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(null);
+  const [editId, setEditId] = useState(null);
 
-  const handleInputChange = (e) => {
-    setInput(e.target.value);
-  };
+  useEffect(() => {
+    // Fetch items when component mounts
+    axios.get('http://localhost:3000/inventory-items')
+      .then(response => setItems(response.data))
+      .catch(error => console.error('Error:', error));
+  }, []);
 
   const handleAddItem = () => {
     if (isEditing) {
-      const updatedItems = [...items];
-      updatedItems[currentIndex] = input;
-      setItems(updatedItems);
-      setIsEditing(false);
-      setCurrentIndex(null);
+      // Update item
+      axios.put(`http://localhost:3000/inventory-items/${editId}`, { name: input })
+        .then(response => {
+          setItems(items.map(item => item.id === editId ? { ...item, name: input } : item));
+          setIsEditing(false);
+          setEditId(null);
+          setInput('');
+        })
+        .catch(error => console.error('Error:', error));
     } else {
-      setItems([...items, input]);
+      // Add new item
+      axios.post('http://localhost:3000/inventory-items', { name: input })
+        .then(response => {
+          setItems([...items, response.data]); // Assuming response.data contains the newly added item with all properties
+          setInput('');
+        })
+        .catch(error => console.error('Error:', error));
     }
-    setInput('');
   };
 
-  const handleEditItem = (index) => {
-    setInput(items[index]);
+  const handleEditItem = (item) => {
+    setInput(item.name);
     setIsEditing(true);
-    setCurrentIndex(index);
+    setEditId(item.id);
   };
 
-  const handleDeleteItem = (index) => {
-    const updatedItems = items.filter((_, i) => i !== index);
-    setItems(updatedItems);
+  const handleDeleteItem = (id) => {
+    axios.delete(`http://localhost:3000/inventory-items/${id}`)
+      .then(response => {
+        setItems(items.filter(item => item.id !== id));
+      })
+      .catch(error => console.error('Error:', error));
   };
 
   return (
     <div>
       <h2>Inventory</h2>
-      <div>
-  <input 
-    type="text" 
-    value={input} 
-    onChange={handleInputChange} 
-    placeholder="Add a new item" 
-    className="inventory-input"
-  />
-  <button onClick={handleAddItem} className="inventory-button">
-    {isEditing ? 'Update Item' : 'Add Item'}
-  </button>
-</div>
-
-
-      <ul className="inventory-list">
-        {items.map((item, index) => (
-          <li key={index} className="inventory-item">
-            {item}
-            <div>
-              <button onClick={() => handleEditItem(index)}>Edit</button>
-              <button onClick={() => handleDeleteItem(index)}>Delete</button>
-            </div>
+      <input
+        type="text"
+        value={input}
+        onChange={e => setInput(e.target.value)}
+        placeholder="Add a new item"
+      />
+      <button onClick={handleAddItem}>
+        {isEditing ? 'Update Item' : 'Add Item'}
+      </button>
+      <ul>
+        {items.map((item) => (
+          <li key={item.id}>
+            {item.name} {/* Render item properties as needed */}
+            <button onClick={() => handleEditItem(item)}>Edit</button>
+            <button onClick={() => handleDeleteItem(item.id)}>Delete</button>
           </li>
         ))}
       </ul>
     </div>
   );
-}
+};
 
 export default Inventory;

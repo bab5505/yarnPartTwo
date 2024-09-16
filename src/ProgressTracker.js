@@ -1,53 +1,52 @@
+import axios from 'axios';
 import React, { useState, useRef, useEffect } from 'react';
 
 const ProgressTracker = () => {
   const [input, setInput] = useState('');
   const [items, setItems] = useState([]);
-  const [notes, setNotes] = useState([]); // Manage notes for each item
+  const [notes, setNotes] = useState([]);
   const [noteInput, setNoteInput] = useState('');
   const [currentNoteText, setCurrentNoteText] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
-  const [activeIndex, setActiveIndex] = useState(null); // Track the active timer index
-  const [time, setTime] = useState({}); // Track time for each item
-  const [editNoteIndex, setEditNoteIndex] = useState(null); // Track which note is being edited
-  const [noteEditingIndex, setNoteEditingIndex] = useState(null); // Track which item is being edited
+  const [activeIndex, setActiveIndex] = useState(null);
+  const [time, setTime] = useState({});
+  const [editNoteIndex, setEditNoteIndex] = useState(null);
+  const [noteEditingIndex, setNoteEditingIndex] = useState(null);
   const timerRef = useRef(null);
 
   useEffect(() => {
+    // Fetch progress tracker items from the server
+    axios.get('http://localhost:3000/progress-tracker')
+      .then(response => {
+        setItems(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching progress tracker items:', error);
+      });
+
     return () => {
-      // Cleanup timer on component unmount
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
     };
   }, []);
 
-  const handleInputChange = (e) => {
-    setInput(e.target.value);
-  };
-
-  const handleNoteChange = (e) => {
-    setNoteInput(e.target.value);
-  };
-
-  const handleCurrentNoteTextChange = (e) => {
-    setCurrentNoteText(e.target.value);
-  };
+  const handleInputChange = (e) => setInput(e.target.value);
+  const handleNoteChange = (e) => setNoteInput(e.target.value);
+  const handleCurrentNoteTextChange = (e) => setCurrentNoteText(e.target.value);
 
   const handleAddItem = () => {
     if (isEditing) {
-      // Update the item
       const updatedItems = [...items];
       updatedItems[editIndex] = input;
       setItems(updatedItems);
       setIsEditing(false);
       setEditIndex(null);
     } else {
-      // Add new item
       setItems([...items, input]);
-      setTime(prevTime => ({ ...prevTime, [items.length]: 0 })); // Initialize time for new item
-      setNotes(prevNotes => [...prevNotes, []]); // Initialize notes for new item
+      setTime(prevTime => ({ ...prevTime, [items.length]: 0 }));
+      setNotes(prevNotes => [...prevNotes, []]);
     }
     setInput('');
   };
@@ -68,19 +67,15 @@ const ProgressTracker = () => {
   };
 
   const handleStartTimer = (index) => {
-    // Clear any existing timer
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
-    
-    // Start new timer
     timerRef.current = setInterval(() => {
       setTime(prevTime => ({
         ...prevTime,
         [index]: (prevTime[index] || 0) + 1,
       }));
     }, 1000);
-
     setActiveIndex(index);
   };
 
@@ -97,26 +92,24 @@ const ProgressTracker = () => {
 
   const handleAddNote = (index) => {
     if (editNoteIndex !== null) {
-      // Edit existing note
       setNotes(prevNotes => {
         const updatedNotes = [...prevNotes];
-        updatedNotes[index][editNoteIndex] = noteInput; // Update note at editNoteIndex
+        updatedNotes[index][editNoteIndex] = noteInput;
         return updatedNotes;
       });
       setEditNoteIndex(null);
     } else {
-      // Add new note
       setNotes(prevNotes => {
         const updatedNotes = [...prevNotes];
         updatedNotes[index] = [...(updatedNotes[index] || []), noteInput];
         return updatedNotes;
       });
     }
-    setNoteInput(''); // Clear note input after adding
+    setNoteInput('');
   };
 
   const handleEditNote = (index, noteIndex) => {
-    setNoteEditingIndex(index); // Track which item the note belongs to
+    setNoteEditingIndex(index);
     setEditNoteIndex(noteIndex);
     setNoteInput(notes[index][noteIndex]);
   };
@@ -133,11 +126,11 @@ const ProgressTracker = () => {
     <div>
       <h2>Progress Tracker</h2>
       <div>
-        <input 
-          type="text" 
-          value={input} 
-          onChange={handleInputChange} 
-          placeholder="Add a new item" 
+        <input
+          type="text"
+          value={input}
+          onChange={handleInputChange}
+          placeholder="Add a new item"
           className="inventory-input"
         />
         <button onClick={handleAddItem} className="inventory-button">
@@ -153,9 +146,7 @@ const ProgressTracker = () => {
                 <button onClick={() => handleEditItem(index)}>Edit</button>
                 <button onClick={() => handleDeleteItem(index)}>Delete</button>
                 {activeIndex === index ? (
-                  <>
-                    <button onClick={() => handleEndTimer()}>End Timer</button>
-                  </>
+                  <button onClick={() => handleEndTimer()}>End Timer</button>
                 ) : (
                   <button onClick={() => handleStartTimer(index)}>Start Timer</button>
                 )}
@@ -163,11 +154,11 @@ const ProgressTracker = () => {
               </div>
             </div>
             <div>
-              <input 
-                type="text" 
-                value={noteInput} 
-                onChange={handleNoteChange} 
-                placeholder="Add a note" 
+              <input
+                type="text"
+                value={noteInput}
+                onChange={handleNoteChange}
+                placeholder="Add a note"
                 className="inventory-input"
               />
               <button onClick={() => handleAddNote(index)} className="inventory-button">

@@ -1,127 +1,138 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
-  const [newProject, setNewProject] = useState({
+  const [input, setInput] = useState({
     name: '',
     description: '',
-    hookSize: '',
-    needleSize: '',
-    yarnType: '',
+    hook_size: '',
+    needle_size: '',
+    yarn_type: '',
     color: ''
   });
   const [isEditing, setIsEditing] = useState(false);
-  const [editIndex, setEditIndex] = useState(null);
+  const [editId, setEditId] = useState(null);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewProject({
-      ...newProject,
-      [name]: value
+  useEffect(() => {
+    // Fetch projects when component mounts
+    axios.get('/projects')
+      .then(response => setProjects(response.data))
+      .catch(error => console.error('Error:', error));
+  }, []);
+
+  const handleChange = (e) => {
+    setInput({
+      ...input,
+      [e.target.name]: e.target.value
     });
   };
 
-  const handleAddOrUpdateProject = () => {
+  const handleAddProject = () => {
     if (isEditing) {
-      // Update the project
-      const updatedProjects = [...projects];
-      updatedProjects[editIndex] = newProject;
-      setProjects(updatedProjects);
-      setIsEditing(false);
-      setEditIndex(null);
+      // Update project
+      axios.put(`/projects/${editId}`, input)
+        .then(response => {
+          setProjects(projects.map(project => (project.id === editId ? input : project)));
+          setIsEditing(false);
+          setEditId(null);
+          setInput({
+            name: '',
+            description: '',
+            hook_size: '',
+            needle_size: '',
+            yarn_type: '',
+            color: ''
+          });
+        })
+        .catch(error => console.error('Error:', error));
     } else {
       // Add new project
-      setProjects([...projects, newProject]);
+      axios.post('/projects', input)
+        .then(response => {
+          setProjects([...projects, response.data]);
+          setInput({
+            name: '',
+            description: '',
+            hook_size: '',
+            needle_size: '',
+            yarn_type: '',
+            color: ''
+          });
+        })
+        .catch(error => console.error('Error:', error));
     }
-    setNewProject({
-      name: '',
-      description: '',
-      hookSize: '',
-      needleSize: '',
-      yarnType: '',
-      color: ''
-    });
   };
 
-  const handleEditProject = (index) => {
-    setNewProject(projects[index]);
+  const handleEditProject = (project) => {
+    setInput(project);
     setIsEditing(true);
-    setEditIndex(index);
+    setEditId(project.id);
   };
 
-  const handleDeleteProject = (index) => {
-    setProjects(projects.filter((_, i) => i !== index));
+  const handleDeleteProject = (id) => {
+    axios.delete(`/projects/${id}`)
+      .then(response => {
+        setProjects(projects.filter(project => project.id !== id));
+      })
+      .catch(error => console.error('Error:', error));
   };
 
   return (
     <div>
       <h2>Projects</h2>
-      <div>
-        <input
-          type="text"
-          name="name"
-          value={newProject.name}
-          onChange={handleInputChange}
-          placeholder="Name"
-        />
-        <input
-          type="text"
-          name="description"
-          value={newProject.description}
-          onChange={handleInputChange}
-          placeholder="Description"
-        />
-        <input
-          type="text"
-          name="hookSize"
-          value={newProject.hookSize}
-          onChange={handleInputChange}
-          placeholder="Hook Size"
-        />
-        <input
-          type="text"
-          name="needleSize"
-          value={newProject.needleSize}
-          onChange={handleInputChange}
-          placeholder="Needle Size"
-        />
-        <input
-          type="text"
-          name="yarnType"
-          value={newProject.yarnType}
-          onChange={handleInputChange}
-          placeholder="Yarn Type"
-        />
-        <input
-          type="text"
-          name="color"
-          value={newProject.color}
-          onChange={handleInputChange}
-          placeholder="Color"
-        />
-        <button onClick={handleAddOrUpdateProject}>
-          {isEditing ? 'Update Project' : 'Add Project'}
-        </button>
-      </div>
-      <ul className="inventory-list">
-        {projects.map((project, index) => (
-          <li key={index} className="inventory-item">
+      <input
+        type="text"
+        name="name"
+        value={input.name}
+        onChange={handleChange}
+        placeholder="Name"
+      />
+      <input
+        type="text"
+        name="description"
+        value={input.description}
+        onChange={handleChange}
+        placeholder="Description"
+      />
+      <input
+        type="text"
+        name="hook_size"
+        value={input.hook_size}
+        onChange={handleChange}
+        placeholder="Hook Size"
+      />
+      <input
+        type="text"
+        name="needle_size"
+        value={input.needle_size}
+        onChange={handleChange}
+        placeholder="Needle Size"
+      />
+      <input
+        type="text"
+        name="yarn_type"
+        value={input.yarn_type}
+        onChange={handleChange}
+        placeholder="Yarn Type"
+      />
+      <input
+        type="text"
+        name="color"
+        value={input.color}
+        onChange={handleChange}
+        placeholder="Color"
+      />
+      <button onClick={handleAddProject}>
+        {isEditing ? 'Update Project' : 'Add Project'}
+      </button>
+      <ul>
+        {projects.map((project) => (
+          <li key={project.id}>
             <div>
-              <strong>Name:</strong> {project.name}
-              <br />
-              <strong>Description:</strong> {project.description}
-              <br />
-              <strong>Hook Size:</strong> {project.hookSize}
-              <br />
-              <strong>Needle Size:</strong> {project.needleSize}
-              <br />
-              <strong>Yarn Type:</strong> {project.yarnType}
-              <br />
-              <strong>Color:</strong> {project.color}
-              <div>
-                <button onClick={() => handleEditProject(index)}>Edit</button>
-                <button onClick={() => handleDeleteProject(index)}>Delete</button>
-              </div>
+              <strong>{project.name}</strong> - {project.description}
+              <button onClick={() => handleEditProject(project)}>Edit</button>
+              <button onClick={() => handleDeleteProject(project.id)}>Delete</button>
             </div>
           </li>
         ))}
