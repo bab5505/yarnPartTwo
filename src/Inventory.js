@@ -10,7 +10,6 @@ const Inventory = () => {
   const [editId, setEditId] = useState(null);
 
   useEffect(() => {
-    // Fetch items when component mounts
     axios.get(`${API_BASE_URL}/inventory-items`)
       .then(response => setItems(response.data))
       .catch(error => console.error('Error:', error));

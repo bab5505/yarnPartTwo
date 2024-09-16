@@ -23,7 +23,7 @@ app.get('/inventory-items', async (req, res) => {
     const result = await pool.query('SELECT * FROM inventory_items');
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
+    console.error('Error fetching inventory items:', err);
     res.status(500).json({ error: 'Database query failed' });
   }
 });
