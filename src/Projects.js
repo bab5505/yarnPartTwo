@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
+const API_BASE_URL = 'https://yarnparttwo.onrender.com';
+
 const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [input, setInput] = useState({
@@ -16,7 +18,7 @@ const Projects = () => {
 
   useEffect(() => {
     // Fetch projects when component mounts
-    axios.get('http://localhost:3000/projects')  // Ensure this is the correct port
+    axios.get(`${API_BASE_URL}/projects`)
       .then(response => setProjects(response.data))
       .catch(error => console.error('Error:', error));
   }, []);
@@ -31,7 +33,7 @@ const Projects = () => {
   const handleAddProject = () => {
     if (isEditing) {
       // Update project
-      axios.put(`http://localhost:3000/projects/${editId}`, input)  // Ensure this is the correct port
+      axios.put(`${API_BASE_URL}/projects/${editId}`, input)
         .then(response => {
           setProjects(projects.map(project => (project.id === editId ? { ...project, ...input } : project)));
           setIsEditing(false);
@@ -48,7 +50,7 @@ const Projects = () => {
         .catch(error => console.error('Error:', error));
     } else {
       // Add new project
-      axios.post('http://localhost:3000/projects', input)  // Ensure this is the correct port
+      axios.post(`${API_BASE_URL}/projects`, input)
         .then(response => {
           setProjects([...projects, response.data]);
           setInput({
@@ -71,7 +73,7 @@ const Projects = () => {
   };
 
   const handleDeleteProject = (id) => {
-    axios.delete(`http://localhost:3000/projects/${id}`)  // Ensure this is the correct port
+    axios.delete(`${API_BASE_URL}/projects/${id}`)
       .then(response => {
         setProjects(projects.filter(project => project.id !== id));
       })

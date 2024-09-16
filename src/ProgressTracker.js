@@ -1,5 +1,7 @@
-import axios from 'axios';
 import React, { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
+
+const API_BASE_URL = 'https://yarnparttwo.onrender.com';
 
 const ProgressTracker = () => {
   const [input, setInput] = useState('');
@@ -19,7 +21,7 @@ const ProgressTracker = () => {
 
   useEffect(() => {
     // Fetch progress tracker items from the server
-    axios.get('http://localhost:3000/progress-tracker')
+    axios.get(`${API_BASE_URL}/progress-tracker`)
       .then(response => {
         setItems(response.data);
         setNotes(response.data.map(() => [])); // Initialize notes array for each item
@@ -51,7 +53,7 @@ const ProgressTracker = () => {
         start_time: startTime,
         end_time: endTime
       };
-      axios.put(`http://localhost:3000/progress-tracker/${updatedItems[editIndex].id}`, {
+      axios.put(`${API_BASE_URL}/progress-tracker/${updatedItems[editIndex].id}`, {
         name: input,
         start_time: startTime,
         end_time: endTime
@@ -63,7 +65,7 @@ const ProgressTracker = () => {
         })
         .catch(error => console.error('Error updating item:', error.response ? error.response.data : error.message));
     } else {
-      axios.post('http://localhost:3000/progress-tracker', {
+      axios.post(`${API_BASE_URL}/progress-tracker`, {
         name: input,
         start_time: now,
         end_time: endTime || now
@@ -87,7 +89,7 @@ const ProgressTracker = () => {
   };
 
   const handleDeleteItem = (index) => {
-    axios.delete(`http://localhost:3000/progress-tracker/${items[index].id}`)
+    axios.delete(`${API_BASE_URL}/progress-tracker/${items[index].id}`)
       .then(() => {
         setItems(items.filter((_, i) => i !== index));
         setTime(prevTime => {
