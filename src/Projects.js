@@ -16,7 +16,7 @@ const Projects = () => {
 
   useEffect(() => {
     // Fetch projects when component mounts
-    axios.get('/projects')
+    axios.get('http://localhost:3000/projects')  // Ensure this is the correct port
       .then(response => setProjects(response.data))
       .catch(error => console.error('Error:', error));
   }, []);
@@ -31,9 +31,9 @@ const Projects = () => {
   const handleAddProject = () => {
     if (isEditing) {
       // Update project
-      axios.put(`/projects/${editId}`, input)
+      axios.put(`http://localhost:3000/projects/${editId}`, input)  // Ensure this is the correct port
         .then(response => {
-          setProjects(projects.map(project => (project.id === editId ? input : project)));
+          setProjects(projects.map(project => (project.id === editId ? { ...project, ...input } : project)));
           setIsEditing(false);
           setEditId(null);
           setInput({
@@ -48,7 +48,7 @@ const Projects = () => {
         .catch(error => console.error('Error:', error));
     } else {
       // Add new project
-      axios.post('/projects', input)
+      axios.post('http://localhost:3000/projects', input)  // Ensure this is the correct port
         .then(response => {
           setProjects([...projects, response.data]);
           setInput({
@@ -71,7 +71,7 @@ const Projects = () => {
   };
 
   const handleDeleteProject = (id) => {
-    axios.delete(`/projects/${id}`)
+    axios.delete(`http://localhost:3000/projects/${id}`)  // Ensure this is the correct port
       .then(response => {
         setProjects(projects.filter(project => project.id !== id));
       })
