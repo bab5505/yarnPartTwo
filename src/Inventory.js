@@ -64,7 +64,7 @@ const Inventory = () => {
       </button>
       <ul>
         {items.map((item) => (
-          <li key={item.id}>
+          <li key={item.id}> {/* Use item.id as the unique key */}
             {item.name} {/* Render item properties as needed */}
             <button onClick={() => handleEditItem(item)}>Edit</button>
             <button onClick={() => handleDeleteItem(item.id)}>Delete</button>

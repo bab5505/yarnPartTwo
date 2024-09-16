@@ -70,7 +70,6 @@ app.delete('/inventory-items/:id', async (req, res) => {
     res.status(500).json({ error: 'Failed to delete item' });
   }
 });
-  
 
 // ---------------------------
 // Progress Tracker Endpoints
@@ -82,22 +81,23 @@ app.get('/progress-tracker', async (req, res) => {
       const result = await pool.query('SELECT * FROM progress_tracker');
       res.json(result.rows);
     } catch (err) {
-      console.error(err);
+      console.error('Error fetching progress tracker items:', err);
       res.status(500).json({ error: 'Database query failed' });
     }
   });
   
   // Route to add a progress tracker item
   app.post('/progress-tracker', async (req, res) => {
-    const { name, description, start_time, end_time } = req.body;
+    const { item_name, start_time, end_time } = req.body;
     try {
-      await pool.query(
-        'INSERT INTO progress_tracker (name, description, start_time, end_time) VALUES ($1, $2, $3, $4)',
-        [name, description, start_time, end_time]
+      const result = await pool.query(
+        'INSERT INTO progress_tracker (item_name, start_time, end_time) VALUES ($1, $2, $3) RETURNING *',
+        [item_name, start_time, end_time]
       );
-      res.status(201).json({ message: 'Item added' });
+      console.log('Inserted row:', result.rows[0]); // Log the inserted row
+      res.status(201).json(result.rows[0]);
     } catch (err) {
-      console.error(err);
+      console.error('Error inserting progress tracker item:', err);
       res.status(500).json({ error: 'Failed to add item' });
     }
   });
@@ -105,15 +105,15 @@ app.get('/progress-tracker', async (req, res) => {
   // Route to update a progress tracker item
   app.put('/progress-tracker/:id', async (req, res) => {
     const { id } = req.params;
-    const { name, description, start_time, end_time } = req.body;
+    const { item_name, start_time, end_time } = req.body;
     try {
       await pool.query(
-        'UPDATE progress_tracker SET name = $1, description = $2, start_time = $3, end_time = $4 WHERE id = $5',
-        [name, description, start_time, end_time, id]
+        'UPDATE progress_tracker SET item_name = $1, start_time = $2, end_time = $3 WHERE id = $4',
+        [item_name, start_time, end_time, id]
       );
       res.json({ message: 'Item updated' });
     } catch (err) {
-      console.error(err);
+      console.error('Error updating progress tracker item:', err);
       res.status(500).json({ error: 'Failed to update item' });
     }
   });
@@ -125,7 +125,7 @@ app.get('/progress-tracker', async (req, res) => {
       await pool.query('DELETE FROM progress_tracker WHERE id = $1', [id]);
       res.json({ message: 'Item deleted' });
     } catch (err) {
-      console.error(err);
+      console.error('Error deleting progress tracker item:', err);
       res.status(500).json({ error: 'Failed to delete item' });
     }
   });
