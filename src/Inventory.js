@@ -12,8 +12,12 @@ const Inventory = () => {
   useEffect(() => {
     axios.get(`${API_BASE_URL}/inventory-items`)
       .then(response => setItems(response.data))
-      .catch(error => console.error('Error:', error));
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to fetch inventory items. Please check the console for details.');
+      });
   }, []);
+  
 
   const handleAddItem = () => {
     if (isEditing) {
