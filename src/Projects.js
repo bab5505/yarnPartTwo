@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const API_BASE_URL = 'https://yarnparttwo.onrender.com';
+const API_BASE_URL = 'https://yarnparttwo-8zck7.kinsta.page/';
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);

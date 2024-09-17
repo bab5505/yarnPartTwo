@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 
-const API_BASE_URL = 'https://yarnparttwo.onrender.com';
+const API_BASE_URL = 'https://yarnparttwo-8zck7.kinsta.page/';
 
 const ProgressTracker = () => {
   const [input, setInput] = useState('');

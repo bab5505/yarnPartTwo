@@ -19,14 +19,15 @@ const pool = new Pool({
 
 // Route to fetch inventory items
 app.get('/inventory-items', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM inventory_items');
-    res.json(result.rows);
-  } catch (err) {
-    console.error('Error fetching inventory items:', err);
-    res.status(500).json({ error: 'Database query failed' });
-  }
-});
+    try {
+      const result = await pool.query('SELECT * FROM inventory_items');
+      res.json(result.rows);
+    } catch (err) {
+      console.error('Error fetching inventory items:', err);
+      res.status(500).json({ error: 'Database query failed' });
+    }
+  });
+  
 
 // Route to add a new inventory item
 app.post('/inventory-items', async (req, res) => {
