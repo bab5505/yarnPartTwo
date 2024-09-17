@@ -1,12 +1,14 @@
 const express = require('express');
 const { Pool } = require('pg');
-const cors = require('cors'); // Ensure you have this installed
+const cors = require('cors');
 const app = express();
 const port = 3000;
 
 // Middleware to parse JSON and handle CORS
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: 'https://yarnparttwo.onrender.com' 
+}));
 
 // PostgreSQL connection configuration
 const pool = new Pool({
