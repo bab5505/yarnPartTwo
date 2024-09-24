@@ -6,8 +6,20 @@ const port = 3000;
 
 // Middleware to parse JSON and handle CORS
 app.use(express.json());
+const allowedOrigins = ['http://localhost:3001', 'https://yarnparttwo.onrender.com'];
+
 app.use(cors({
-  origin: 'https://yarnparttwo.onrender.com' 
+  origin: function (origin, callback) {
+    // Allow requests with no origin like mobile apps or curl requests
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // PostgreSQL connection configuration
