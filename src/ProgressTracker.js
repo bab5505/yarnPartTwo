@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 
-const API_BASE_URL = 'https://yarnparttwo.onrender.com';
+const API_BASE_URL = window.location.hostname === 'localhost'
+  ? 'http://localhost:3000'
+  : 'https://yarnparttwo.onrender.com';
 
 const ProgressTracker = () => {
   const [input, setInput] = useState('');
