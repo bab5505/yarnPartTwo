@@ -181,13 +181,12 @@ const ProgressTracker = () => {
           <li key={item.id}>
             <div>
               <h3>{item.name}</h3>
-              <p>Start Time: {item.start_time}</p>
-              <p>End Time: {item.end_time}</p>
+              {/* <p>Start Time: {item.start_time}</p>
+              <p>End Time: {item.end_time}</p> */}
               <button onClick={() => handleEditItem(index)}>Edit</button>
               <button onClick={() => handleDeleteItem(index)}>Delete</button>
               {activeIndex === index ? (
                 <>
-                  <button onClick={handlePauseTimer}>Pause Timer</button>
                   <button onClick={handleEndTimer}>End Timer</button>
                 </>
               ) : (
