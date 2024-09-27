@@ -2,7 +2,7 @@ const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 const app = express();
-const port = 3000;
+// const port = 3000;
 
 // Middleware to parse JSON and handle CORS
 app.use(express.json());
@@ -24,12 +24,12 @@ app.use(cors({
 
 // PostgreSQL connection configuration
 const pool = new Pool({
-  user: 'robert',
-  host: 'localhost',
-  database: 'yarn_app',
-  password: 'cookers5',
-  port: 5432,
-});
+    user: process.env.DB_USER || 'robert',
+    host: process.env.DB_HOST || 'localhost',
+    database: process.env.DB_NAME || 'yarn_app',
+    password: process.env.DB_PASS || 'cookers5',
+    port: process.env.DB_PORT || 5432,
+  });
 
 // Route to fetch inventory items
 app.get('/inventory-items', async (req, res) => {
@@ -206,6 +206,7 @@ app.delete('/projects/:id', async (req, res) => {
 });
 
 // Start the server
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
