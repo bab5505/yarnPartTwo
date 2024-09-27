@@ -19,7 +19,6 @@ const Projects = () => {
   const [editId, setEditId] = useState(null);
 
   useEffect(() => {
-    // Fetch projects when component mounts
     axios.get(`${API_BASE_URL}/projects`)
       .then(response => setProjects(response.data))
       .catch(error => console.error('Error:', error));
@@ -28,16 +27,16 @@ const Projects = () => {
   const handleChange = (e) => {
     setInput({
       ...input,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value || ''  // Ensure the input is never undefined
     });
   };
 
   const handleAddProject = () => {
-    if (isEditing) {
+    if (isEditing && editId) {
       // Update project
       axios.put(`${API_BASE_URL}/projects/${editId}`, input)
-        .then(response => {
-          setProjects(projects.map(project => (project.id === editId ? { ...project, ...input } : project)));
+        .then(() => {
+          setProjects(projects.map(project => project.id === editId ? { ...project, ...input } : project));
           setIsEditing(false);
           setEditId(null);
           setInput({
@@ -69,14 +68,21 @@ const Projects = () => {
   };
 
   const handleEditProject = (project) => {
-    setInput(project);
+    setInput({
+      name: project.name || '',
+      description: project.description || '',
+      hook_size: project.hook_size || '',
+      needle_size: project.needle_size || '',
+      yarn_type: project.yarn_type || '',
+      color: project.color || ''
+    });
     setIsEditing(true);
     setEditId(project.id);
   };
 
   const handleDeleteProject = (id) => {
     axios.delete(`${API_BASE_URL}/projects/${id}`)
-      .then(response => {
+      .then(() => {
         setProjects(projects.filter(project => project.id !== id));
       })
       .catch(error => console.error('Error:', error));
@@ -131,8 +137,8 @@ const Projects = () => {
         {isEditing ? 'Update Project' : 'Add Project'}
       </button>
       <ul>
-        {projects.map((project) => (
-          <li key={project.id}>
+        {projects.map((project, index) => (
+          <li key={project.id || index}>
             <div>
               <strong>{project.name}</strong> - {project.description}
               <button onClick={() => handleEditProject(project)}>Edit</button>
